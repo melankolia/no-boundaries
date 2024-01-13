@@ -1,9 +1,8 @@
-<script setup>
-import TheWelcome from '../components/TheWelcome.vue'
-</script>
+<script setup></script>
 
 <template>
-  <main>
-    <TheWelcome />
-  </main>
+  <div class="flex flex-row">
+    <p class="text-red-500">1</p>
+    <p class="text-red-500">2</p>
+  </div>
 </template>
