@@ -37,23 +37,26 @@ const handleSend = () => {
         <div class="flex flex-row w-10 h-10 border border-blue-500 bg-blue-500 rounded-full"></div>
         <p class="mx-2.5">Barnabas Sobor</p>
       </div>
-      <div class="flex flex-col flex-1 overflow-scroll p-4 space-y-2">
+      <div class="flex flex-col flex-1 overflow-scroll p-4 space-y-5">
         <div
           v-for="(e, i) in messages"
           :key="`message-${i}`"
-          class="flex flex-row"
-          :class="{ 'justify-end': e.sender == 'user' }"
+          class="flex"
+          :class="[e.sender == 'user' ? 'flex-row-reverse' : 'flex-row']"
         >
           <div
-            class="flex flex-col w-10 h-10 bg-[#f4c425] border-[#f4c425] border-2 rounded-full"
+            class="flex flex-col self-end w-10 h-10 mb-5 bg-[#f4c425] border-[#f4c425] border-2 rounded-full"
           />
           <div
             class="flex flex-col mx-2.5 space-y-0.5 max-w-[80%]"
             style="overflow-wrap: break-word"
           >
             <div
-              class="flex flex-col rounded-t-md rounded-br-md max-w-1/2"
-              :class="[e.sender != 'user' ? 'bg-blue-500' : 'bg-gray-300']"
+              class="flex flex-col rounded-t-md max-w-1/2"
+              :class="[
+                e.sender != 'user' ? 'bg-blue-500' : 'bg-gray-300',
+                e.sender != 'user' ? 'rounded-br-md' : 'rounded-bl-md'
+              ]"
             >
               <p
                 class="text-md px-2 py-1.5"
