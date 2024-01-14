@@ -33,23 +33,26 @@ const handleSend = () => {
 <template>
   <div class="flex flex-row h-dvh">
     <div class="flex flex-1 flex-col">
-      <div class="flex flex-row border-2 border-green-600 items-center p-2">
+      <div class="flex flex-row border-2 items-center p-2">
         <div class="flex flex-row w-10 h-10 border border-blue-500 bg-blue-500 rounded-full"></div>
         <p class="mx-2.5">Barnabas Sobor</p>
       </div>
-      <div class="flex flex-col overflow-scroll mt-auto">
+      <div class="flex flex-col flex-1 overflow-scroll p-4 space-y-2">
         <div
           v-for="(e, i) in messages"
           :key="`message-${i}`"
-          class="flex flex-row m-2"
+          class="flex flex-row"
           :class="{ 'justify-end': e.sender == 'user' }"
         >
           <div
             class="flex flex-col w-10 h-10 bg-[#f4c425] border-[#f4c425] border-2 rounded-full"
           />
-          <div class="flex flex-col mx-2.5 space-y-0.5">
+          <div
+            class="flex flex-col mx-2.5 space-y-0.5 max-w-[80%]"
+            style="overflow-wrap: break-word"
+          >
             <div
-              class="flex flex-col rounded-t-md rounded-br-md"
+              class="flex flex-col rounded-t-md rounded-br-md max-w-1/2"
               :class="[e.sender != 'user' ? 'bg-blue-500' : 'bg-gray-300']"
             >
               <p
@@ -63,7 +66,7 @@ const handleSend = () => {
           </div>
         </div>
       </div>
-      <div class="flex flex-row m-0.5">
+      <div class="flex flex-row ml-3 my-3">
         <input
           class="flex-1 rounded-md py-1 px-2 border border-gray-500"
           placeholder="Message"
