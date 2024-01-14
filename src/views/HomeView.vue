@@ -31,7 +31,7 @@ const handleSend = () => {
 </script>
 
 <template>
-  <div class="flex flex-row h-svh">
+  <div class="flex flex-row h-screen">
     <div class="flex flex-1 flex-col">
       <div class="flex flex-row border-2 border-green-600 items-center p-2">
         <div class="flex flex-row w-10 h-10 border border-blue-500 bg-blue-500 rounded-full"></div>
