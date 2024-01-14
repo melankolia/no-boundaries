@@ -47,10 +47,7 @@ const handleSend = () => {
           <div
             class="flex flex-col self-end w-10 h-10 mb-5 bg-[#f4c425] border-[#f4c425] border-2 rounded-full"
           />
-          <div
-            class="flex flex-col mx-2.5 space-y-0.5 max-w-[80%]"
-            style="overflow-wrap: break-word"
-          >
+          <div class="flex flex-col mx-2.5 space-y-0.5 max-w-[80%]" style="overflow-wrap: anywhere">
             <div
               class="flex flex-col rounded-t-md max-w-1/2"
               :class="[
