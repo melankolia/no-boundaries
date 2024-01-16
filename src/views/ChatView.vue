@@ -1,22 +1,22 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { db } from '@/plugins/firebase'
-import { collection, addDoc, getDocs, query, serverTimestamp, orderBy } from 'firebase/firestore'
+import { collection, addDoc, getDocs, query, serverTimestamp, where } from 'firebase/firestore'
 
 import SendIcon from 'vue-material-design-icons/Send.vue'
 
 const message = ref(null)
 const messages = ref([
-  // {
-  //   message: 'Hi Cedar. Send me the mockup file.',
-  //   sender: 'Sobor',
-  //   time: '1 day ago'
-  // },
-  // {
-  //   message: 'Hi Sobor, wait a minute',
-  //   sender: 'user',
-  //   time: '1 day ago'
-  // }
+  {
+    message: 'Hi Cedar. Send me the mockup file.',
+    sender: 'Sobor',
+    time: '1 day ago'
+  },
+  {
+    message: 'Hi Sobor, wait a minute',
+    sender: 'user',
+    time: '1 day ago'
+  }
 ])
 
 const handleSend = () => {
@@ -45,34 +45,39 @@ const handleSend = () => {
     })
 }
 
-const getData = async (params = null) => {
+const getData = async () => {
   const chatRefs = collection(db, 'chats')
 
-  getDocs(query(chatRefs, orderBy('time'))).then((result) => {
-    if (params == 'append') messages.value = []
+  getDocs(query(chatRefs), where('username', '==', 'ageng')).then((result) => {
+    result.forEach((e) => console.log(e.get()))
+    // if (params == 'append') messages.value = []
 
-    result.forEach((doc) => {
-      const timestamp = new Date(doc.data().time.seconds * 1000)
-      const time = `${('0' + timestamp.getDate()).slice(-2)}-${('0' + (timestamp.getMonth() + 1)).slice(-2)}-${timestamp.getFullYear()}`
-      messages.value = [
-        ...messages.value,
-        {
-          ...doc.data(),
-          time
-        }
-      ]
-      console.log(`${doc.id} =>`, doc.data())
-    })
+    // result.forEach((doc) => {
+    //   const timestamp = new Date(doc.data().time.seconds * 1000)
+    //   const time = `${('0' + timestamp.getDate()).slice(-2)}-${('0' + (timestamp.getMonth() + 1)).slice(-2)}-${timestamp.getFullYear()}`
+    //   messages.value = [
+    //     ...messages.value,
+    //     {
+    //       ...doc.data(),
+    //       time
+    //     }
+    //   ]
+    //   // console.log(`${doc.id} =>`, doc.data())
+    // })
   })
 }
 
+const handleFocus = () => {
+  console.log('HANDLE FOCUS')
+}
+
 onMounted(() => {
-  getData()
+  // getData()
 })
 </script>
 
 <template>
-  <div class="flex flex-row" style="height: 100dvh">
+  <div class="flex flex-row h-dvh">
     <div class="flex flex-1 flex-col">
       <div class="flex flex-row border-2 items-center p-2">
         <div class="flex flex-row w-10 h-10 border border-blue-500 bg-blue-500 rounded-full"></div>
@@ -109,6 +114,7 @@ onMounted(() => {
       </div>
       <div class="flex flex-row ml-3 my-3">
         <input
+          @focus="handleFocus"
           class="flex-1 rounded-md py-1 px-2 border border-gray-500"
           placeholder="Message"
           v-model="message"
