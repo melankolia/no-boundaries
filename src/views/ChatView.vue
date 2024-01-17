@@ -1,43 +1,78 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { db } from '@/plugins/firebase'
-import { collection, addDoc, getDocs, query, serverTimestamp, where } from 'firebase/firestore'
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  query,
+  orderBy,
+  where,
+  getDocs,
+  getDoc,
+  doc
+} from 'firebase/firestore'
 
 import SendIcon from 'vue-material-design-icons/Send.vue'
+import Loading from '@/components/GeneralLoader.vue'
+
+const loading = ref(true)
+const userId = ref('hv37K6HtotLezogo4iod')
+// const userId = ref('xbTjR9JwUJ5KqmOBPSv3')
+
+const conversationId = ref('dcd92b40-bced-4831-b4f7-bf1007211b15')
+
+const recipient = reactive({
+  secureId: 'xbTjR9JwUJ5KqmOBPSv3',
+  username: 'Sara Putri Fauliah'
+})
+// const recipient = reactive({
+//   secureId: 'hv37K6HtotLezogo4iod',
+//   username: 'Ageng Setyo Nugroho'
+// })
 
 const message = ref(null)
 const messages = ref([
   {
-    message: 'Hi Cedar. Send me the mockup file.',
-    sender: 'Sobor',
-    time: '1 day ago'
-  },
-  {
-    message: 'Hi Sobor, wait a minute',
-    sender: 'user',
-    time: '1 day ago'
+    from: null,
+    to: null,
+    message: null,
+    secureId: null,
+    time: null
   }
 ])
 
 const handleSend = () => {
-  addDoc(collection(db, 'chats'), {
+  const payload = {
+    from: userId.value,
+    to: recipient.secureId,
     message: message.value,
-    sender: 'user',
+    secureId: messages.value.at(-1).secureId,
     time: serverTimestamp()
+  }
+  addDoc(collection(db, 'conversations'), {
+    ...payload
   })
     .then((docRef) => {
+      // console.log(docRef.)
       if (docRef.id) {
-        // messages.value = [
-        //   ...messages.value,
-        //   {
-        //     message: message.value,
-        //     sender: 'user',
-        //     time: '1 day ago'
-        //   }
-        // ]
-        getData('append')
+        const convoRef = doc(db, 'conversations', docRef.id)
+        getDoc(convoRef)
+          .then((doc) => {
+            const timestamp = new Date(doc.data().time.seconds * 1000)
+            const time = `${('0' + timestamp.getHours).slice(-2)}-${('0' + timestamp.getMinutes()).slice(-2)}}`
 
-        message.value = null
+            messages.value = [...messages.value, { ...doc.data(), time }]
+          })
+          .catch((err) => {
+            console.error(err)
+            const timestamp = new Date()
+            const time = `${('0' + timestamp.getHours()).slice(-2)}-${('0' + timestamp.getMinutes()).slice(-2)}}`
+            messages.value = [...messages.value, { ...payload, time }]
+          })
+          .finally(() => {
+            message.value = null
+          })
       }
     })
     .catch((error) => {
@@ -45,26 +80,45 @@ const handleSend = () => {
     })
 }
 
+// const getSingleData = async () => {
+//   setTimeout(() => {
+//     loading.value = false
+//   }, 5000)
+//   const userRef = doc(db, 'users', userId.value)
+
+//   getDoc(userRef).then((docSnap) => {
+//     if (docSnap.exists()) {
+//       console.log('Document Data:', docSnap.data())
+//     }
+//   })
+// }
+
 const getData = async () => {
-  const chatRefs = collection(db, 'chats')
+  const convoRef = collection(db, 'conversations')
 
-  getDocs(query(chatRefs), where('username', '==', 'ageng')).then((result) => {
-    result.forEach((e) => console.log(e.get()))
-    // if (params == 'append') messages.value = []
+  getDocs(query(convoRef, where('secureId', '==', conversationId.value), orderBy('time')))
+    .then((docs) => {
+      if (docs.size > 0) {
+        let result = []
 
-    // result.forEach((doc) => {
-    //   const timestamp = new Date(doc.data().time.seconds * 1000)
-    //   const time = `${('0' + timestamp.getDate()).slice(-2)}-${('0' + (timestamp.getMonth() + 1)).slice(-2)}-${timestamp.getFullYear()}`
-    //   messages.value = [
-    //     ...messages.value,
-    //     {
-    //       ...doc.data(),
-    //       time
-    //     }
-    //   ]
-    //   // console.log(`${doc.id} =>`, doc.data())
-    // })
-  })
+        docs.forEach((doc) => {
+          const timestamp = new Date(doc.data().time.seconds * 1000)
+          const time = `${('0' + timestamp.getHours()).slice(-2)}:${('0' + timestamp.getMinutes()).slice(-2)}`
+
+          result = [
+            ...result,
+            {
+              ...doc.data(),
+              time
+            }
+          ]
+        })
+
+        messages.value = [...result]
+      }
+    })
+    .catch((err) => console.error(err))
+    .finally(() => (loading.value = false))
 }
 
 const handleFocus = () => {
@@ -72,7 +126,7 @@ const handleFocus = () => {
 }
 
 onMounted(() => {
-  // getData()
+  getData()
 })
 </script>
 
@@ -81,14 +135,16 @@ onMounted(() => {
     <div class="flex flex-1 flex-col">
       <div class="flex flex-row border-2 items-center p-2">
         <div class="flex flex-row w-10 h-10 border border-blue-500 bg-blue-500 rounded-full"></div>
-        <p class="mx-2.5">Barnabas Sobor</p>
+        <p class="mx-2.5">{{ recipient.username }}</p>
       </div>
       <div class="flex flex-col flex-1 overflow-scroll p-4 space-y-5">
+        <Loading v-if="loading" />
         <div
+          v-else
           v-for="(e, i) in messages"
           :key="`message-${i}`"
           class="flex"
-          :class="[e.sender == 'user' ? 'flex-row-reverse' : 'flex-row']"
+          :class="[e.from == userId ? 'flex-row-reverse' : 'flex-row']"
         >
           <div
             class="flex flex-col self-end w-10 h-10 mb-5 bg-[#f4c425] border-[#f4c425] border-2 rounded-full"
@@ -97,13 +153,13 @@ onMounted(() => {
             <div
               class="flex flex-col rounded-t-md max-w-1/2"
               :class="[
-                e.sender != 'user' ? 'bg-blue-500' : 'bg-gray-300',
-                e.sender != 'user' ? 'rounded-br-md' : 'rounded-bl-md'
+                e.from != userId ? 'bg-blue-500' : 'bg-gray-300',
+                e.from != userId ? 'rounded-br-md' : 'rounded-bl-md'
               ]"
             >
               <p
                 class="text-md px-2 py-1.5"
-                :class="[e.sender != 'user' ? 'text-white' : 'text-gray-800']"
+                :class="[e.from != userId ? 'text-white' : 'text-gray-800']"
               >
                 {{ e.message }}
               </p>
