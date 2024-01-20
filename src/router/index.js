@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-const ChatView = () => import('../views/ChatView.vue')
+import ChatRoute from '@/views/Chat/router'
+import LoginRoute from '@/views/Login/router'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,11 +9,8 @@ const router = createRouter({
       path: '/',
       redirect: { name: 'chatView' }
     },
-    {
-      path: '/chat',
-      name: 'chatView',
-      component: ChatView
-    }
+    LoginRoute,
+    ChatRoute
   ]
 })
 

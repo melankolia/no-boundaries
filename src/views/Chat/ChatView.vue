@@ -12,12 +12,16 @@ import {
   getDoc,
   doc
 } from 'firebase/firestore'
+import { useUserStore } from '@/stores/user'
+
+const { getUserId } = useUserStore()
 
 import SendIcon from 'vue-material-design-icons/Send.vue'
 import Loading from '@/components/GeneralLoader.vue'
 
+const chatsElement = ref(null)
 const loading = ref(true)
-const userId = ref('hv37K6HtotLezogo4iod')
+// const userId = ref('hv37K6HtotLezogo4iod')
 // const userId = ref('xbTjR9JwUJ5KqmOBPSv3')
 
 const conversationId = ref('dcd92b40-bced-4831-b4f7-bf1007211b15')
@@ -44,7 +48,7 @@ const messages = ref([
 
 const handleSend = () => {
   const payload = {
-    from: userId.value,
+    from: getUserId,
     to: recipient.secureId,
     message: message.value,
     secureId: messages.value.at(-1).secureId,
@@ -60,18 +64,23 @@ const handleSend = () => {
         getDoc(convoRef)
           .then((doc) => {
             const timestamp = new Date(doc.data().time.seconds * 1000)
-            const time = `${('0' + timestamp.getHours).slice(-2)}-${('0' + timestamp.getMinutes()).slice(-2)}}`
+            const time = `${('0' + timestamp.getHours()).slice(-2)}:${('0' + timestamp.getMinutes()).slice(-2)}`
 
             messages.value = [...messages.value, { ...doc.data(), time }]
           })
           .catch((err) => {
             console.error(err)
             const timestamp = new Date()
-            const time = `${('0' + timestamp.getHours()).slice(-2)}-${('0' + timestamp.getMinutes()).slice(-2)}}`
+            const time = `${('0' + timestamp.getHours()).slice(-2)}:${('0' + timestamp.getMinutes()).slice(-2)}`
             messages.value = [...messages.value, { ...payload, time }]
           })
           .finally(() => {
             message.value = null
+            chatsElement.value.scrollIntoView({
+              behavior: 'smooth',
+              block: 'end',
+              inline: 'nearest'
+            })
           })
       }
     })
@@ -118,7 +127,9 @@ const getData = async () => {
       }
     })
     .catch((err) => console.error(err))
-    .finally(() => (loading.value = false))
+    .finally(() => {
+      loading.value = false
+    })
 }
 
 const handleFocus = () => {
@@ -127,6 +138,9 @@ const handleFocus = () => {
 
 onMounted(() => {
   getData()
+  setTimeout(() => {
+    chatsElement.value.scrollTop += 250
+  }, 10000)
 })
 </script>
 
@@ -137,14 +151,14 @@ onMounted(() => {
         <div class="flex flex-row w-10 h-10 border border-blue-500 bg-blue-500 rounded-full"></div>
         <p class="mx-2.5">{{ recipient.username }}</p>
       </div>
-      <div class="flex flex-col flex-1 overflow-scroll p-4 space-y-5">
+      <div ref="chatsElement" class="flex flex-col flex-1 overflow-scroll p-4 space-y-5">
         <Loading v-if="loading" />
         <div
           v-else
           v-for="(e, i) in messages"
           :key="`message-${i}`"
           class="flex"
-          :class="[e.from == userId ? 'flex-row-reverse' : 'flex-row']"
+          :class="[e.from == getUserId ? 'flex-row-reverse' : 'flex-row']"
         >
           <div
             class="flex flex-col self-end w-10 h-10 mb-5 bg-[#f4c425] border-[#f4c425] border-2 rounded-full"
@@ -153,18 +167,18 @@ onMounted(() => {
             <div
               class="flex flex-col rounded-t-md max-w-1/2"
               :class="[
-                e.from != userId ? 'bg-blue-500' : 'bg-gray-300',
-                e.from != userId ? 'rounded-br-md' : 'rounded-bl-md'
+                e.from != getUserId ? 'bg-blue-500' : 'bg-gray-300',
+                e.from != getUserId ? 'rounded-br-md' : 'rounded-bl-md'
               ]"
             >
               <p
                 class="text-md px-2 py-1.5"
-                :class="[e.from != userId ? 'text-white' : 'text-gray-800']"
+                :class="[e.from != getUserId ? 'text-white' : 'text-gray-800']"
               >
                 {{ e.message }}
               </p>
             </div>
-            <p class="text-xs pt-1">{{ e.time }}</p>
+            <p :class="{ 'self-end': e.from == getUserId }" class="text-xs pt-1">{{ e.time }}</p>
           </div>
         </div>
       </div>
