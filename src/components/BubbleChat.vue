@@ -27,7 +27,7 @@ const recipientAva = computed(() => props.recipient?.photoURL)
   >
     <img
       :src="e.from != getUserId ? recipientAva : getUserAva"
-      class="rounded-full max-w-10 max-h-10 object-cover"
+      class="rounded-full max-w-8 max-h-8 object-cover self-end mb-2.5"
     />
     <div class="flex flex-col mx-2.5 space-y-0.5 max-w-[80%]" style="overflow-wrap: anywhere">
       <div
@@ -38,7 +38,7 @@ const recipientAva = computed(() => props.recipient?.photoURL)
         ]"
       >
         <p
-          class="text-md px-2 py-1.5"
+          class="text-md px-2.5 py-1.5"
           :class="[e.from != getUserId ? 'text-white' : 'text-gray-800']"
         >
           {{ e.message }}

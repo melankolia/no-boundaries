@@ -103,6 +103,8 @@ const getData = async () => {
       await getRecipients(convo.get('participants'))
       await getConversations(convo.get('conversationId'))
     }
+  } catch (err) {
+    console.log(err)
   } finally {
     loading.value = false
   }
@@ -128,12 +130,14 @@ const getRecipients = async (participants) => {
   })
 }
 const getChatRooms = async () => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const convoRef = collection(db, 'chat_rooms')
     getDocs(query(convoRef, where('participants', 'array-contains', getUserId)))
       .then((docs) => {
         if (!docs.empty) {
           resolve(docs.docs)
+        } else {
+          reject('Data Not Found!')
         }
       })
       .catch((err) => console.error(err))
