@@ -15,6 +15,7 @@ export const useUserStore = defineStore('user', () => {
   )
 
   const getUserId = computed(() => user.value.uid)
+  const getUserAva = computed(() => user.value.photoUrl)
 
   function login() {
     return new Promise((resolve, reject) => {
@@ -34,7 +35,6 @@ export const useUserStore = defineStore('user', () => {
             photoUrl: resultUser.photoURL
           }
 
-          console.log(resultUser.uid)
           resolve(token)
         })
         .catch((error) => {
@@ -54,5 +54,5 @@ export const useUserStore = defineStore('user', () => {
     })
   }
 
-  return { user, getUserId, login }
+  return { user, getUserId, getUserAva, login }
 })
